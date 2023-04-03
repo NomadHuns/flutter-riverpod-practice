@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// We create a "provider", which will store a value (here "Hello world").
-// By using a provider, this allows us to mock/override the value exposed.
-final helloWorldProvider = Provider<String>((ref) {
-  return 'Hello World!';
-});
-final byeWorldProvider = Provider<String>((ref) {
-  final String value = ref.read(helloWorldProvider);
-  return 'Bye World!' + value;
-});
+class Counter extends StateNotifier<int> {
+  Counter() : super(0);
+
+  void increment(){
+    state++;
+  }
+}
+
+final counterProvider = StateNotifierProvider<Counter, int>(
+  (ref) {
+    return Counter();
+  },
+);
 
 void main() {
   runApp(
@@ -26,14 +30,22 @@ void main() {
 class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String value1 = ref.watch(byeWorldProvider);
-    final String value2 = ref.watch(helloWorldProvider);
+    final int value = ref.watch(counterProvider);
 
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Example')),
         body: Center(
-          child: Text(value1 + value2),
+          child: Text(
+            value.toString(),
+            style: TextStyle(fontSize: 80),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            ref.read(counterProvider.notifier).increment();
+          },
+          child: Icon(Icons.add),
         ),
       ),
     );
